@@ -14,7 +14,6 @@
  *
  * @wordpress-plugin
  * Plugin Name:       BS SPAM Protector
- * Plugin URI:        https://neuropassenger.ru
  * Description:       This plugin protects Contact Form 7 from spam.
  * Version:           1.1.0
  * Author:            Oleg Sokolov
