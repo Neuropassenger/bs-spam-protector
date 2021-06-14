@@ -108,7 +108,7 @@ class Bs_Spam_Protector_Public {
 	public function ajax_get_validation_key() {
 		$nonce = sanitize_key( $_POST['nonce'] );
 		$expiration = intval( $_POST['expiration'] );
-		$secret_key = 'secret'; // TODO: admin page with an input field for the secret key
+		$secret_key = get_option( 'bs_spam_protector_secret_key' );
 
 		// Nonce check
 		if ( ! wp_verify_nonce( $nonce, 'cf7_bs_spam_protector' ) ) {
@@ -155,7 +155,7 @@ class Bs_Spam_Protector_Public {
 
 		$nonce = sanitize_key( $_POST['bs_hf_nonce'] );
 		$expiration = intval( $_POST['bs_hf_expiration'] );
-		$secret_key = 'secret'; // TODO: admin page with an input field for the secret key
+		$secret_key = get_option( 'bs_spam_protector_secret_key' );
 		$validation_key = sanitize_key( $_POST['bs_hf_validation_key'] );
 		$actual_validation_key = hash_hmac( 'md5', $nonce . $expiration, $secret_key );
 

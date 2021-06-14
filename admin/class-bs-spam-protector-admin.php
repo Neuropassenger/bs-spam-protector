@@ -100,4 +100,54 @@ class Bs_Spam_Protector_Admin {
 
 	}
 
+    public function add_plugin_settings_page() {
+        add_options_page( 'SPAM Protector', 'SPAM Protector', 'manage_options', $this->plugin_name, array( $this, 'render_settings_page' ) );
+    }
+
+    function render_settings_page() {
+        ?>
+        <h1 class="wp-heading-inline">
+            <?php echo get_admin_page_title() ?>
+        </h1>
+        <form method="post" action="options.php">
+            <?php
+            settings_fields( 'bs_spam_protector_general' );
+            do_settings_sections( $this->plugin_name );
+            submit_button();
+            ?>
+        </form>
+        <?
+    }
+
+    public function add_plugin_settings() {
+	    register_setting(
+	        'bs_spam_protector_general',
+            'bs_spam_protector_secret_key'
+        );
+
+        add_settings_section(
+            'bs_spam_protector_general',
+            'General Settings',
+            array( $this, 'show_general_settings_section' ),
+            $this->plugin_name
+        );
+
+        add_settings_field(
+            'bs_spam_protector_secret_key',
+            'Secret key to generate a validation key',
+            array( $this, 'show_secret_key_field' ),
+            $this->plugin_name,
+            'bs_spam_protector_general'
+        );
+    }
+
+    function show_general_settings_section() {
+        // Block before fields
+    }
+
+    function show_secret_key_field() {
+        $secret_key = get_option( 'bs_spam_protector_secret_key' );
+        echo "<input type='text' class='regular-text bs_spam-protector-secret-key' name='bs_spam_protector_secret_key' value='" . ($secret_key ?? '') . "'>";
+    }
+
 }

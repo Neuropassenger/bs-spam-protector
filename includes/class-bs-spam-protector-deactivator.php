@@ -30,7 +30,8 @@ class Bs_Spam_Protector_Deactivator {
 	 * @since    1.0.0
 	 */
 	public static function deactivate() {
-
+        // Remove secret key
+        delete_option( 'bs_spam_protector_secret_key' );
 	}
 
 }

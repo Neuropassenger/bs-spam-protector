@@ -35,8 +35,15 @@
 		$('form.wpcf7-form').append('<input type="hidden" value="" name="bs_hf_validation_key" class="bs_hf-validation-key">');
 
 		let validationCodeSent = false;
-		$('form.wpcf7-form .wpcf7-form-control-wrap input.wpcf7-validates-as-required').on('focus', function() {
-			const inputOnFocus = this;
+		$('form.wpcf7-form input').on('focus', function() {
+			getValidationKey(this);
+		});
+
+		$('form.wpcf7-form textarea').on('focus', function() {
+			getValidationKey(this);
+		});
+
+		function getValidationKey(elemOnFocus) {
 			if (validationCodeSent)
 				return;
 
@@ -53,14 +60,14 @@
 
 				},
 				success: function (data) {
-					$(inputOnFocus).closest('form.wpcf7-form').find('.bs_hf-validation-key').val(data.validationKey);
+					$(elemOnFocus).closest('form.wpcf7-form').find('.bs_hf-validation-key').val(data.validationKey);
 					validationCodeSent = true;
 				},
 				error: function (error) {
 					console.log(error);
 				}
 			});
-		});
+		}
 	});
 
 })( jQuery );

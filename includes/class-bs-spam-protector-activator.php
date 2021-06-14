@@ -30,7 +30,10 @@ class Bs_Spam_Protector_Activator {
 	 * @since    1.0.0
 	 */
 	public static function activate() {
-
+        // Secret key generation
+        $time = time();
+        $secret_key = hash_hmac( 'sha256', $time, date( 'F', $time ) );
+        update_option( 'bs_spam_protector_secret_key', $secret_key );
 	}
 
 }
