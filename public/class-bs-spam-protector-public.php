@@ -97,7 +97,85 @@ class Bs_Spam_Protector_Public {
 		 */
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/bs-spam-protector-public.js', array( 'jquery' ), $this->version, false );
+		wp_localize_script( $this->plugin_name, 'bs_vars', array(
+			'nonce'       =>  wp_create_nonce( 'cf7_bs_spam_protector' ),
+			'expiration'  =>  time() + 60 * 120,
+			'ajaxUrl'     =>  admin_url( 'admin-ajax.php' ),
+		) );
 
+	}
+
+	public function ajax_get_validation_key() {
+		$nonce = sanitize_key( $_POST['nonce'] );
+		$expiration = intval( $_POST['expiration'] );
+		$secret_key = 'secret'; // TODO: admin page with an input field for the secret key
+
+		// Nonce check
+		if ( ! wp_verify_nonce( $nonce, 'cf7_bs_spam_protector' ) ) {
+			$response = array(
+				'message' => 'Security Error',
+				'status'  => 'error',
+			);
+
+			// Expiration check
+		} elseif ( time() > $expiration ) {
+			$response = array(
+				'message' => 'Expiration Error',
+				'status'  => 'error',
+			);
+
+			// Create validation key
+		} else {
+			$validation_key = hash_hmac( 'md5', $nonce . $expiration, $secret_key );
+			$response = array(
+				'validationKey'   => $validation_key,
+				'status'    => 'ok',
+			);
+		}
+
+		echo json_encode( $response );
+		die;
+	}
+
+	public function is_spam_submission( $spam ) {
+		if ( $spam ) {
+			return $spam;
+		}
+
+		$submission = WPCF7_Submission::get_instance();
+
+		if ( empty( $_POST['bs_hf_nonce'] ) || empty( $_POST['bs_hf_expiration'] ) || empty( $_POST['bs_hf_validation_key'] ) ) {
+			$submission->add_spam_log( array(
+				'agent' => 'bs_spam_protector',
+				'reason' => "Validation fields are empty",
+			) );
+
+			return $spam = true;
+		}
+
+		$nonce = sanitize_key( $_POST['bs_hf_nonce'] );
+		$expiration = intval( $_POST['bs_hf_expiration'] );
+		$secret_key = 'secret'; // TODO: admin page with an input field for the secret key
+		$validation_key = sanitize_key( $_POST['bs_hf_validation_key'] );
+		$actual_validation_key = hash_hmac( 'md5', $nonce . $expiration, $secret_key );
+
+		if ( time() > $expiration ) {
+			$submission->add_spam_log( array(
+				'agent' => 'bs_spam_protector',
+				'reason' => "Validation key is expired",
+			) );
+
+			return $spam = true;
+		} elseif ( $validation_key !== $actual_validation_key ) {
+			$submission->add_spam_log( array(
+				'agent' => 'bs_spam_protector',
+				'reason' => "Invalid validation key",
+			) );
+
+			return $spam = true;
+		} else {
+			return $spam = false;
+		}
 	}
 
 }

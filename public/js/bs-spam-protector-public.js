@@ -29,4 +29,38 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
+	$( window ).load(function () {
+		$('form.wpcf7-form').append('<input type="hidden" value="'+ bs_vars.nonce +'" name="bs_hf_nonce">');
+		$('form.wpcf7-form').append('<input type="hidden" value="'+ bs_vars.expiration +'" name="bs_hf_expiration">');
+		$('form.wpcf7-form').append('<input type="hidden" value="" name="bs_hf_validation_key" class="bs_hf-validation-key">');
+
+		let validationCodeSent = false;
+		$('form.wpcf7-form .wpcf7-form-control-wrap input.wpcf7-validates-as-required').on('focus', function() {
+			const inputOnFocus = this;
+			if (validationCodeSent)
+				return;
+
+			$.ajax({
+				type: 'POST',
+				dataType: 'json',
+				url: bs_vars.ajaxUrl,
+				data: {
+					action: 'bs_get_validation_key',
+					nonce: bs_vars.nonce,
+					expiration: bs_vars.expiration,
+				},
+				beforeSend: function () {
+
+				},
+				success: function (data) {
+					$(inputOnFocus).closest('form.wpcf7-form').find('.bs_hf-validation-key').val(data.validationKey);
+					validationCodeSent = true;
+				},
+				error: function (error) {
+					console.log(error);
+				}
+			});
+		});
+	});
+
 })( jQuery );
