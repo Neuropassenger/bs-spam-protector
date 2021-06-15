@@ -147,7 +147,7 @@ class Bs_Spam_Protector_Admin {
 
     function show_secret_key_field() {
         $secret_key = get_option( 'bs_spam_protector_secret_key' );
-        echo "<input type='text' class='regular-text bs_spam-protector-secret-key' name='bs_spam_protector_secret_key' value='" . ($secret_key ?? '') . "'>";
+        echo "<input type='text' class='regular-text bs_spam-protector-secret-key' name='bs_spam_protector_secret_key' value='" . (esc_attr( $secret_key ) ?? '') . "'>";
     }
 
 }

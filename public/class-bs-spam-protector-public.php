@@ -133,8 +133,7 @@ class Bs_Spam_Protector_Public {
 			);
 		}
 
-		echo json_encode( $response );
-		die;
+        wp_send_json( $response );
 	}
 
 	public function is_spam_submission( $spam ) {
