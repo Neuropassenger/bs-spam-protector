@@ -4,7 +4,7 @@ Donate link: https://neuropassenger.ru
 Tags: cf7, spam, form
 Requires at least: 5.7.2
 Tested up to: 5.7.2
-Stable tag: 1.1.1
+Stable tag: 1.1.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -17,6 +17,9 @@ This plugin protects Contact Form 7 from spam.
 
 == Changelog ==
 
+= 1.1.2 =
+* Added the ability to use protection on several forms on a single page.
+
 = 1.1.1 =
 * Security fixes.
 
@@ -28,6 +31,9 @@ This plugin protects Contact Form 7 from spam.
 * First stable version.
 
 == Upgrade Notice ==
+
+= 1.1.2 =
+* If you are using more than one form on a single page, you need this update.
 
 = 1.1.1 =
 This version fixes security related issues.  Upgrade immediately.
