@@ -17,6 +17,9 @@ This plugin protects Contact Form 7 from spam.
 
 == Changelog ==
 
+= 1.1.3 =
+* Implemented earlier JavaScript loading for more reliable initialization of the validation process.
+
 = 1.1.2 =
 * Added the ability to use protection on several forms on a single page.
 
@@ -31,6 +34,9 @@ This plugin protects Contact Form 7 from spam.
 * First stable version.
 
 == Upgrade Notice ==
+
+= 1.1.3 =
+* It is recommended that you update if some submitted forms are incorrectly validated.
 
 = 1.1.2 =
 * If you are using more than one form on a single page, you need this update.
