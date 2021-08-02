@@ -115,7 +115,7 @@ class Bs_Spam_Protector_Public {
         if ( $log_flag ) {
             // Before sanitizing
             Bs_Spam_Protector_Functions::logit(array(
-                'none'          =>  $_POST['nonce'],
+                'nonce'          =>  $_POST['nonce'],
                 'form_id'       =>  $_POST['form_id'],
                 'expiration'    =>  $_POST['expiration'],
                 'secret_key'    =>  $secret_key,
@@ -148,7 +148,7 @@ class Bs_Spam_Protector_Public {
         if ( $log_flag ) {
             // After sanitizing
             Bs_Spam_Protector_Functions::logit(array(
-                'none'          =>  $nonce,
+                'nonce'          =>  $nonce,
                 'form_id'       =>  $form_id,
                 'expiration'    =>  $expiration,
                 'secret_key'    =>  $secret_key,
