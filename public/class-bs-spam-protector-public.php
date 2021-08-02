@@ -96,7 +96,7 @@ class Bs_Spam_Protector_Public {
          * class.
          */
 
-        wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/bs-spam-protector-public.js', array( 'jquery' ), $this->version, false );
+        wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/bs-spam-protector-public.js', array( 'jquery' ), false );
         wp_localize_script( $this->plugin_name, 'bs_vars', array(
             'nonce'       =>  wp_create_nonce( 'cf7_bs_spam_protector' ),
             'expiration'  =>  time() + 60 * 120,
@@ -115,10 +115,10 @@ class Bs_Spam_Protector_Public {
         if ( $log_flag ) {
             // Before sanitizing
             Bs_Spam_Protector_Functions::logit(array(
-                'none' => $_POST['nonce'],
-                'form_id' => $_POST['form_id'],
-                'expiration' => $_POST['expiration'],
-                'secret_key' => $secret_key,
+                'none'          =>  $_POST['nonce'],
+                'form_id'       =>  $_POST['form_id'],
+                'expiration'    =>  $_POST['expiration'],
+                'secret_key'    =>  $secret_key,
             ), '[INFO]: Validation. STEP 1. Input data before sanitizing.');
         }
 
@@ -148,15 +148,26 @@ class Bs_Spam_Protector_Public {
         if ( $log_flag ) {
             // After sanitizing
             Bs_Spam_Protector_Functions::logit(array(
-                'none' => $nonce,
-                'form_id' => $form_id,
-                'expiration' => $expiration,
-                'secret_key' => $secret_key,
-                'response' => $response
+                'none'          =>  $nonce,
+                'form_id'       =>  $form_id,
+                'expiration'    =>  $expiration,
+                'secret_key'    =>  $secret_key,
+                'response'      =>  $response
             ), '[INFO]: Validation. STEP 1. Input data after sanitizing with response.');
         }
 
         wp_send_json( $response );
+    }
+
+    public function ajax_get_validation_meta() {
+        $expiration = time() + 60 * 120;
+        $nonce = wp_create_nonce( 'cf7_bs_spam_protector' );
+
+        wp_send_json( array(
+            'expiration'    =>  $expiration,
+            'nonce'         =>  $nonce,
+            'status'        =>  'ok'
+        ) );
     }
 
     public function is_spam_submission( $spam ) {
@@ -178,11 +189,12 @@ class Bs_Spam_Protector_Public {
 
             if ( $log_flag ) {
                 Bs_Spam_Protector_Functions::logit(array(
-                    'nonce' => $_POST['bs_hf_nonce'],
-                    'form_id' => $_POST['bs_hf_form_id'],
-                    'expiration' => $_POST['bs_hf_expiration'],
-                    'secret_key' => $secret_key,
-                    'container_post_id' => $container_post_id
+                    'nonce'             =>  $_POST['bs_hf_nonce'],
+                    'form_id'           =>  $_POST['bs_hf_form_id'],
+                    'expiration'        =>  $_POST['bs_hf_expiration'],
+                    'secret_key'        =>  $secret_key,
+                    'validation_key'    =>  $_POST['bs_hf_validation_key'],
+                    'container_post_id' =>  $container_post_id
                 ), '[ERROR]: Validation. STEP 2. Input data before sanitizing. One of the required fields is empty.');
             }
 
@@ -203,13 +215,13 @@ class Bs_Spam_Protector_Public {
 
             if ( $log_flag ) {
                 Bs_Spam_Protector_Functions::logit(array(
-                    'nonce' => $nonce,
-                    'form_id' => $form_id,
-                    'expiration' => $expiration,
-                    'secret_key' => $secret_key,
-                    'vaidation_key' => $validation_key,
-                    'actual_validation_key' => $actual_validation_key,
-                    'container_post_id' => $container_post_id
+                    'nonce'                 =>  $nonce,
+                    'form_id'               =>  $form_id,
+                    'expiration'            =>  $expiration,
+                    'secret_key'            =>  $secret_key,
+                    'validation_key'        =>  $validation_key,
+                    'actual_validation_key' =>  $actual_validation_key,
+                    'container_post_id'     =>  $container_post_id
                 ), '[ERROR]: Validation. STEP 2. Input data after sanitizing. Validation key is expired.');
             }
 
@@ -222,13 +234,13 @@ class Bs_Spam_Protector_Public {
 
             if ( $log_flag ) {
                 Bs_Spam_Protector_Functions::logit(array(
-                    'nonce' => $nonce,
-                    'form_id' => $form_id,
-                    'expiration' => $expiration,
-                    'secret_key' => $secret_key,
-                    'vaidation_key' => $validation_key,
-                    'actual_validation_key' => $actual_validation_key,
-                    'container_post_id' => $container_post_id
+                    'nonce'                 =>  $nonce,
+                    'form_id'               =>  $form_id,
+                    'expiration'            =>  $expiration,
+                    'secret_key'            =>  $secret_key,
+                    'validation_key'        =>  $validation_key,
+                    'actual_validation_key' =>  $actual_validation_key,
+                    'container_post_id'     =>  $container_post_id
                 ), '[ERROR]: Validation. STEP 2. Input data after sanitizing. Invalid validation key.');
             }
 
@@ -236,13 +248,13 @@ class Bs_Spam_Protector_Public {
         } else {
             if ( $log_flag ) {
                 Bs_Spam_Protector_Functions::logit(array(
-                    'nonce' => $nonce,
-                    'form_id' => $form_id,
-                    'expiration' => $expiration,
-                    'secret_key' => $secret_key,
-                    'vaidation_key' => $validation_key,
-                    'actual_validation_key' => $actual_validation_key,
-                    'container_post_id' => $container_post_id
+                    'nonce'                 =>  $nonce,
+                    'form_id'               =>  $form_id,
+                    'expiration'            =>  $expiration,
+                    'secret_key'            =>  $secret_key,
+                    'validation_key'        =>  $validation_key,
+                    'actual_validation_key' =>  $actual_validation_key,
+                    'container_post_id'     =>  $container_post_id
                 ), '[INFO]: Validation. STEP 2. Submission created!');
             }
 
