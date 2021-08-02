@@ -39,6 +39,9 @@
 			data: {
 				action: 'bs_get_validation_meta',
 			},
+			beforeSend: function () {
+
+			},
 			success: function(data) {
 				if (data.status === 'ok') {
 					upNonce = data.nonce;
@@ -89,7 +92,7 @@
 					expiration: upExpiration,
 				},
 				beforeSend: function () {
-
+					$(elemOnFocus).closest('form.wpcf7-form').find('input.wpcf7-submit').attr('disable', 'true');
 				},
 				success: function (data) {
 					$(elemOnFocus).closest('form.wpcf7-form').find('.bs_hf-validation-key').val(data.validationKey);
@@ -102,6 +105,9 @@
 				error: function (error) {
 					console.log(error);
 					validationCodesSent[formId] = false;
+				},
+				complete: function() {
+					$(elemOnFocus).closest('form.wpcf7-form').find('input.wpcf7-submit').attr('disable', 'false');
 				}
 			});
 		}
