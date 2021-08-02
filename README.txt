@@ -17,6 +17,9 @@ This plugin protects Contact Form 7 from spam.
 
 == Changelog ==
 
+= 1.2.2 =
+* Now the button for submitting Contact Form 7 will be inactive while the validation key is received from the server.
+
 = 1.2.1 =
 * Fixes conflicts with cache.
 
