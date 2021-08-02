@@ -17,6 +17,9 @@ This plugin protects Contact Form 7 from spam.
 
 == Changelog ==
 
+= 1.2.0 =
+* Added detailed log system for the validation process.
+
 = 1.1.3 =
 * Implemented earlier JavaScript loading for more reliable initialization of the validation process.
 

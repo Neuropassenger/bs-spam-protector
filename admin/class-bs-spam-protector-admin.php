@@ -125,6 +125,11 @@ class Bs_Spam_Protector_Admin {
             'bs_spam_protector_secret_key'
         );
 
+        register_setting(
+            'bs_spam_protector_general',
+            'bs_spam_protector_log_checkbox'
+        );
+
         add_settings_section(
             'bs_spam_protector_general',
             'General Settings',
@@ -139,6 +144,14 @@ class Bs_Spam_Protector_Admin {
             $this->plugin_name,
             'bs_spam_protector_general'
         );
+
+        add_settings_field(
+            'bs_spam_protector_log_checkbox',
+            'Enable detailed log',
+            array( $this, 'show_log_checkbox_field' ),
+            $this->plugin_name,
+            'bs_spam_protector_general'
+        );
     }
 
     function show_general_settings_section() {
@@ -148,6 +161,12 @@ class Bs_Spam_Protector_Admin {
     function show_secret_key_field() {
         $secret_key = get_option( 'bs_spam_protector_secret_key' );
         echo "<input type='text' class='regular-text bs_spam-protector-secret-key' name='bs_spam_protector_secret_key' value='" . (esc_attr( $secret_key ) ?? '') . "'>";
+    }
+
+    function show_log_checkbox_field() {
+        $checkbox = get_option( 'bs_spam_protector_log_checkbox' );
+        echo "<input type='checkbox' class='bs_spam-protector-log-checkbox' name='bs_spam_protector_log_checkbox'" . checked( $checkbox, 'on', false ) . ">";
+        echo "<p>You can find the log of the plugin operation along this path - wp-content/bs_spam_protector.log.</p>";
     }
 
 }
