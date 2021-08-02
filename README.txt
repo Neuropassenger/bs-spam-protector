@@ -17,7 +17,7 @@ This plugin protects Contact Form 7 from spam.
 
 == Changelog ==
 
-= 1.2.1=
+= 1.2.1 =
 * Fixes conflicts with cache.
 
 = 1.2.0 =
