@@ -148,7 +148,7 @@ class Bs_Spam_Protector_Public {
         if ( $log_flag ) {
             // After sanitizing
             Bs_Spam_Protector_Functions::logit(array(
-                'nonce'          =>  $nonce,
+                'nonce'         =>  $nonce,
                 'form_id'       =>  $form_id,
                 'expiration'    =>  $expiration,
                 'secret_key'    =>  $secret_key,
@@ -180,6 +180,7 @@ class Bs_Spam_Protector_Public {
         $container_post_id = $submission->get_meta('container_post_id');
         $log_flag = get_option( 'bs_spam_protector_log_checkbox', false );
 
+        // Are the initialization fields filled?
         if ( empty( $_POST['bs_hf_nonce'] ) || empty( $_POST['bs_hf_expiration'] ) || empty( $_POST['bs_hf_validation_key'] )
             || empty( $_POST['bs_hf_form_id'] )  ) {
             $submission->add_spam_log( array(
@@ -206,7 +207,10 @@ class Bs_Spam_Protector_Public {
         $expiration = intval( $_POST['bs_hf_expiration'] );
         $validation_key = sanitize_key( $_POST['bs_hf_validation_key'] );
         $actual_validation_key = hash_hmac( 'md5', $nonce . $expiration . $form_id, $secret_key );
+        $filling_form_time = $this->get_filling_form_time();
+        $expected_filling_form_time = $this->get_min_expected_filling_form_time();
 
+        // Expiration time
         if ( time() > $expiration ) {
             $submission->add_spam_log( array(
                 'agent' => 'bs_spam_protector',
@@ -226,6 +230,8 @@ class Bs_Spam_Protector_Public {
             }
 
             return $spam = true;
+
+            // Key validation
         } elseif ( $validation_key !== $actual_validation_key ) {
             $submission->add_spam_log( array(
                 'agent' => 'bs_spam_protector',
@@ -245,8 +251,16 @@ class Bs_Spam_Protector_Public {
             }
 
             return $spam = true;
-        } else {
-            if ( $log_flag ) {
+
+            // Form filled out too quickly
+            // TODO: interval settings
+        } elseif ( $filling_form_time < $expected_filling_form_time ) {
+            $submission->add_spam_log(array(
+                'agent' => 'bs_spam_protector',
+                'reason' => "Form filled out too quickly (In " . $filling_form_time . " second(s), " . $expected_filling_form_time . " second(s) expected.)",
+            ));
+
+            if ($log_flag) {
                 Bs_Spam_Protector_Functions::logit(array(
                     'nonce'                 =>  $nonce,
                     'form_id'               =>  $form_id,
@@ -254,11 +268,127 @@ class Bs_Spam_Protector_Public {
                     'secret_key'            =>  $secret_key,
                     'validation_key'        =>  $validation_key,
                     'actual_validation_key' =>  $actual_validation_key,
-                    'container_post_id'     =>  $container_post_id
+                    'container_post_id'     =>  $container_post_id,
+                    'filling_time'          =>  $filling_form_time,
+                    'expected_filling_time' =>  $expected_filling_form_time
+                ), '[ERROR]: Validation. STEP 2. Input data after sanitizing. Form filled out too quickly.');
+            }
+
+            return $spam = true;
+
+            // Success submission
+        } else {
+            if ( $log_flag ) {
+                Bs_Spam_Protector_Functions::logit(array(
+                    'nonce'                         =>  $nonce,
+                    'form_id'                       =>  $form_id,
+                    'expiration'                    =>  $expiration,
+                    'secret_key'                    =>  $secret_key,
+                    'validation_key'                =>  $validation_key,
+                    'actual_validation_key'         =>  $actual_validation_key,
+                    'container_post_id'             =>  $container_post_id,
+                    'filling_time'                  =>  $filling_form_time,
+                    'expected_filling_time'         =>  $expected_filling_form_time
                 ), '[INFO]: Validation. STEP 2. Submission created!');
             }
 
             return $spam = false;
+        }
+    }
+
+    function get_filling_form_time() {
+        $expiration = intval( $_POST['bs_hf_expiration'] );
+        $start_filling_form_timestamp = $expiration - 60 * 120; // TODO: make only one setting value, search: '60 * 120* in the code
+        $finish_filling_form_timestamp = time() - 2; // 2 - time for network delays
+
+        return $finish_filling_form_timestamp - $start_filling_form_timestamp;
+    }
+
+    function get_min_expected_filling_form_time() {
+        $log_flag = get_option( 'bs_spam_protector_log_checkbox', false );
+        $form_filling_standards = array(
+            'email'                 =>  1,
+            'text'                  =>  1,
+            'tel'                   =>  1,
+            'radio'                 =>  1,
+            'textarea'              =>  3,
+            'file'                  =>  3,
+            'checkbox'              =>  1,
+            'url'                   =>  1,
+            'password'              =>  1,
+            'number'                =>  1,
+            'date'                  =>  2,
+            'select'                =>  1,
+            'acceptance'            =>  1,
+            'quiz'                  =>  1
+        );
+        $expected_filling_form_time = 0;
+
+        $posted_data = WPCF7_Submission::get_instance()->get_posted_data();
+        // Let's remove tech fields
+        unset($posted_data['bs_hf_nonce']);
+        unset($posted_data['bs_hf_expiration']);
+        unset($posted_data['bs_hf_validation_key']);
+        unset($posted_data['bs_hf_form_id']);
+
+        $container_post_id = WPCF7_Submission::get_instance()->get_meta('container_post_id');
+
+        foreach ( $posted_data as $field_name => $field_value ) {
+            // Looking for the corresponding tag in the form code
+            $field_type = $this->get_form_field_type_by_name( $field_name );
+            if ( ! $field_type ) {
+                continue;
+            }
+
+            // Skip empty fields
+            if ( $field_type != 'file' && empty( $field_value ) ) {
+                continue;
+            }
+
+            switch ( $field_type ) {
+                // Separate time computation for files, because a user can pass an empty file field
+                case 'file':
+                    $expected_filling_field_time = $this->get_expected_filling_time_for_file_field_type( $field_name, $container_post_id );
+                    break;
+                default:
+                    $expected_filling_field_time = $form_filling_standards[$field_type];
+                    break;
+            }
+
+            $expected_filling_form_time += $expected_filling_field_time;
+
+            // Logging
+            if ( $log_flag )
+                Bs_Spam_Protector_Functions::logit( array(
+                    'expected_filling_field_time'   =>  $expected_filling_field_time,
+                    'expected_filling_form_time'    =>  $expected_filling_form_time,
+                    'field_name'                    =>  $field_name
+                ), '[INFO]: Expected filling time for the ' . $field_type . ' field type' );
+        }
+
+        return $expected_filling_form_time;
+    }
+
+    function get_form_field_type_by_name( $field_name ) {
+        $form_tags = WPCF7_Submission::get_instance()->get_contact_form()->scan_form_tags();
+        foreach ( $form_tags as $form_tag ) {
+            if ( $form_tag->raw_name == $field_name ) {
+                return $form_tag->basetype;
+            }
+        }
+        return false;
+    }
+
+    function get_expected_filling_time_for_file_field_type( $field_name, $container_post_id ) {
+        if ( ! isset( $_FILES[$field_name] ) ) {
+            return 0;
+        }
+        $file = $_FILES[$field_name];
+
+        if ( ! empty( $file['tmp_name'] ) ) {
+            return 3;
+        } else {
+            return 0;
         }
     }
 

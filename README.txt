@@ -3,8 +3,8 @@ Contributors: neuropassenger
 Donate link: https://neuropassenger.ru
 Tags: cf7, spam, form
 Requires at least: 5.7.2
-Tested up to: 5.7.2
-Stable tag: 1.2.1
+Tested up to: 5.8.2
+Stable tag: 1.3.4
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,6 +16,12 @@ This plugin protects Contact Form 7 from spam.
 2. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+= 1.3.4 =
+* Fixed a bug related to the calculation of the time to select files for uploading.
+
+= 1.3.0 =
+* Enhanced spam protection, new verification criteria.
 
 = 1.2.2 =
 * Now the button for submitting Contact Form 7 will be inactive while the validation key is received from the server.
