@@ -130,6 +130,11 @@ class Bs_Spam_Protector_Admin {
             'bs_spam_protector_log_checkbox'
         );
 
+        register_setting(
+            'bs_spam_protector_general',
+            'bs_spam_protector_expiration_interval'
+        );
+
         add_settings_section(
             'bs_spam_protector_general',
             'General Settings',
@@ -152,6 +157,14 @@ class Bs_Spam_Protector_Admin {
             $this->plugin_name,
             'bs_spam_protector_general'
         );
+
+        add_settings_field(
+            'bs_spam_protector_expiration_interval',
+            'Expiration interval',
+            array( $this, 'show_expiration_interval_field' ),
+            $this->plugin_name,
+            'bs_spam_protector_general'
+        );
     }
 
     function show_general_settings_section() {
@@ -167,6 +180,12 @@ class Bs_Spam_Protector_Admin {
         $checkbox = get_option( 'bs_spam_protector_log_checkbox' );
         echo "<input type='checkbox' class='bs_spam-protector-log-checkbox' name='bs_spam_protector_log_checkbox'" . checked( $checkbox, 'on', false ) . ">";
         echo "<p>You can find the log of the plugin operation along this path - wp-content/bs_spam_protector.log.</p>";
+    }
+
+    function show_expiration_interval_field() {
+        $expiration_interval = get_option( 'bs_spam_protector_expiration_interval' );
+        echo "<input type='number' class='regular-text bs_spam_protector_expiration_interval' name='bs_spam_protector_expiration_interval' placeholder='12' value='" . (esc_attr( $expiration_interval ) ?? '') . "'>";
+        echo "<p>The allowed time interval <strong>in hours</strong> between opening and submitting a form.</p>";
     }
 
 }

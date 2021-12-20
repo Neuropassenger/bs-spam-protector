@@ -185,6 +185,9 @@ class Bs_Spam_Protector {
 
 		$this->loader->add_filter( 'wpcf7_spam', $plugin_public, 'is_spam_submission' );
 
+        //$this->loader->add_action( 'load-flamingo_page_flamingo_inbound', $plugin_public, 'add_spam_protector_flamingo_meta_box' );
+        $this->loader->add_filter( 'flamingo_add_inbound', $plugin_public, 'prepare_data_for_flamingo_inbound' );
+
 	}
 
 	/**

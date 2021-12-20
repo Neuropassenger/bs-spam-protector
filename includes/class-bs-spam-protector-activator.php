@@ -34,6 +34,7 @@ class Bs_Spam_Protector_Activator {
         $time = time();
         $secret_key = hash_hmac( 'sha256', $time, date( 'F', $time ) );
         update_option( 'bs_spam_protector_secret_key', $secret_key );
+        update_option( 'bs_spam_protector_expiration_interval', 12 );
 	}
 
 }

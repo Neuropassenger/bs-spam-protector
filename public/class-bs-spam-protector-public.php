@@ -97,9 +97,10 @@ class Bs_Spam_Protector_Public {
          */
 
         wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/bs-spam-protector-public.js', array( 'jquery' ), false );
+        $expiration_interval = get_option( 'bs_spam_protector_expiration_interval' );
         wp_localize_script( $this->plugin_name, 'bs_vars', array(
             'nonce'       =>  wp_create_nonce( 'cf7_bs_spam_protector' ),
-            'expiration'  =>  time() + 60 * 120,
+            'expiration'  =>  time() + 60 * 60 * $expiration_interval,
             'ajaxUrl'     =>  admin_url( 'admin-ajax.php' ),
         ) );
 
@@ -115,7 +116,7 @@ class Bs_Spam_Protector_Public {
         if ( $log_flag ) {
             // Before sanitizing
             Bs_Spam_Protector_Functions::logit(array(
-                'nonce'          =>  $_POST['nonce'],
+                'nonce'         =>  $_POST['nonce'],
                 'form_id'       =>  $_POST['form_id'],
                 'expiration'    =>  $_POST['expiration'],
                 'secret_key'    =>  $secret_key,
@@ -160,7 +161,8 @@ class Bs_Spam_Protector_Public {
     }
 
     public function ajax_get_validation_meta() {
-        $expiration = time() + 60 * 120;
+        $expiration_interval = get_option( 'bs_spam_protector_expiration_interval' );
+        $expiration = time() + 60 * 60 * $expiration_interval;
         $nonce = wp_create_nonce( 'cf7_bs_spam_protector' );
 
         wp_send_json( array(
@@ -177,7 +179,7 @@ class Bs_Spam_Protector_Public {
 
         $secret_key = get_option( 'bs_spam_protector_secret_key' );
         $submission = WPCF7_Submission::get_instance();
-        $container_post_id = $submission->get_meta('container_post_id');
+        $container_post_id = $submission->get_meta( 'container_post_id' );
         $log_flag = get_option( 'bs_spam_protector_log_checkbox', false );
 
         // Are the initialization fields filled?
@@ -253,11 +255,10 @@ class Bs_Spam_Protector_Public {
             return $spam = true;
 
             // Form filled out too quickly
-            // TODO: interval settings
         } elseif ( $filling_form_time < $expected_filling_form_time ) {
             $submission->add_spam_log(array(
                 'agent' => 'bs_spam_protector',
-                'reason' => "Form filled out too quickly (In " . $filling_form_time . " second(s), " . $expected_filling_form_time . " second(s) expected.)",
+                'reason' => "Form filled out too quickly (In " . $filling_form_time . " second(s), " . $expected_filling_form_time . " second(s) expected).",
             ));
 
             if ($log_flag) {
@@ -298,7 +299,8 @@ class Bs_Spam_Protector_Public {
 
     function get_filling_form_time() {
         $expiration = intval( $_POST['bs_hf_expiration'] );
-        $start_filling_form_timestamp = $expiration - 60 * 120; // TODO: make only one setting value, search: '60 * 120* in the code
+        $expiration_interval = get_option( 'bs_spam_protector_expiration_interval' );
+        $start_filling_form_timestamp = $expiration - 60 * 60 * $expiration_interval;
         $finish_filling_form_timestamp = time() - 2; // 2 - time for network delays
 
         return $finish_filling_form_timestamp - $start_filling_form_timestamp;
@@ -326,12 +328,10 @@ class Bs_Spam_Protector_Public {
 
         $posted_data = WPCF7_Submission::get_instance()->get_posted_data();
         // Let's remove tech fields
-        unset($posted_data['bs_hf_nonce']);
-        unset($posted_data['bs_hf_expiration']);
-        unset($posted_data['bs_hf_validation_key']);
-        unset($posted_data['bs_hf_form_id']);
-
-        $container_post_id = WPCF7_Submission::get_instance()->get_meta('container_post_id');
+        unset( $posted_data['bs_hf_nonce'] );
+        unset( $posted_data['bs_hf_expiration'] );
+        unset( $posted_data['bs_hf_validation_key'] );
+        unset( $posted_data['bs_hf_form_id'] );
 
         foreach ( $posted_data as $field_name => $field_value ) {
             // Looking for the corresponding tag in the form code
@@ -348,7 +348,10 @@ class Bs_Spam_Protector_Public {
             switch ( $field_type ) {
                 // Separate time computation for files, because a user can pass an empty file field
                 case 'file':
-                    $expected_filling_field_time = $this->get_expected_filling_time_for_file_field_type( $field_name, $container_post_id );
+                    $expected_filling_field_time = $this->get_expected_filling_time_for_file_field_type( $field_name );
+                    break;
+                case 'textarea':
+                    $expected_filling_field_time = $this->get_expected_filling_time_for_textarea_field_type( $field_name );
                     break;
                 default:
                     $expected_filling_field_time = $form_filling_standards[$field_type];
@@ -379,7 +382,7 @@ class Bs_Spam_Protector_Public {
         return false;
     }
 
-    function get_expected_filling_time_for_file_field_type( $field_name, $container_post_id ) {
+    function get_expected_filling_time_for_file_field_type( $field_name ) {
         if ( ! isset( $_FILES[$field_name] ) ) {
             return 0;
         }
@@ -390,6 +393,34 @@ class Bs_Spam_Protector_Public {
         } else {
             return 0;
         }
+    }
+
+    function get_expected_filling_time_for_textarea_field_type( $field_name ) {
+        $textarea_content = $_POST[$field_name];
+        $content_size = mb_strlen( $textarea_content );
+        $expected_time = round( $content_size / 10 );
+
+        return $expected_time;
+    }
+
+    function prepare_data_for_flamingo_inbound( $args ) {
+        // Let's save SPAM Protector fields to the meta section
+        $args['meta']['bs_hf_nonce'] = $args['fields']['bs_hf_nonce'];
+        $args['meta']['bs_hf_expiration'] = $args['fields']['bs_hf_expiration'];
+        $args['meta']['bs_hf_validation_key'] = $args['fields']['bs_hf_validation_key'];
+        $args['meta']['bs_hf_form_id'] = $args['fields']['bs_hf_form_id'];
+
+        $filling_form_time = $this->get_filling_form_time();
+        $expected_filling_form_time = $this->get_min_expected_filling_form_time();
+        $args['meta']['filling_time'] = $filling_form_time;
+        $args['meta']['expected_filling_time'] = $expected_filling_form_time;
+
+        unset( $args['fields']['bs_hf_nonce'] );
+        unset( $args['fields']['bs_hf_expiration'] );
+        unset( $args['fields']['bs_hf_validation_key'] );
+        unset( $args['fields']['bs_hf_form_id'] );
+
+        return $args;
     }
 
 }
