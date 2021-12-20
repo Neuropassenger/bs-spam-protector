@@ -4,7 +4,7 @@ Donate link: https://neuropassenger.ru
 Tags: cf7, spam, form
 Requires at least: 5.7.2
 Tested up to: 5.8.2
-Stable tag: 1.6.0
+Stable tag: 1.6.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,6 +16,9 @@ This plugin protects Contact Form 7 from spam.
 2. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+= 1.6.1 =
+* After the plugin update, the time interval for filling out forms is set to 12 hours for the validator to work correctly.
 
 = 1.6.0 =
 * SPAM Protector information is now stored in the Flamingo 'meta' column.

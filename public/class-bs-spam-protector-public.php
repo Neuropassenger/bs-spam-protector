@@ -403,7 +403,7 @@ class Bs_Spam_Protector_Public {
         return $expected_time;
     }
 
-    function prepare_data_for_flamingo_inbound( $args ) {
+    public function prepare_data_for_flamingo_inbound( $args ) {
         // Let's save SPAM Protector fields to the meta section
         $args['meta']['bs_hf_nonce'] = $args['fields']['bs_hf_nonce'];
         $args['meta']['bs_hf_expiration'] = $args['fields']['bs_hf_expiration'];
@@ -421,6 +421,15 @@ class Bs_Spam_Protector_Public {
         unset( $args['fields']['bs_hf_form_id'] );
 
         return $args;
+    }
+
+    public function do_upgrade() {
+        // Expiration interval
+        $expiration_interval = get_option( 'bs_spam_protector_expiration_interval', false );
+
+        if ( version_compare( $this->version, '1.6.0', '>=' ) && $expiration_interval == false ) {
+            update_option( 'bs_spam_protector_expiration_interval', 12 );
+        }
     }
 
 }

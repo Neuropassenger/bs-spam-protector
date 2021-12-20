@@ -178,14 +178,14 @@ class Bs_Spam_Protector {
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
+        $this->loader->add_action( 'plugins_loaded', $plugin_public, 'do_upgrade' );
+
 		$this->loader->add_action( 'wp_ajax_bs_get_validation_key', $plugin_public, 'ajax_get_validation_key' );
 		$this->loader->add_action( 'wp_ajax_nopriv_bs_get_validation_key', $plugin_public, 'ajax_get_validation_key' );
 		$this->loader->add_action( 'wp_ajax_bs_get_validation_meta', $plugin_public, 'ajax_get_validation_meta' );
 		$this->loader->add_action( 'wp_ajax_nopriv_bs_get_validation_meta', $plugin_public, 'ajax_get_validation_meta' );
 
 		$this->loader->add_filter( 'wpcf7_spam', $plugin_public, 'is_spam_submission' );
-
-        //$this->loader->add_action( 'load-flamingo_page_flamingo_inbound', $plugin_public, 'add_spam_protector_flamingo_meta_box' );
         $this->loader->add_filter( 'flamingo_add_inbound', $plugin_public, 'prepare_data_for_flamingo_inbound' );
 
 	}
