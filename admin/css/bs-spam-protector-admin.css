@@ -6,3 +6,7 @@
 input.bs_spam-protector-secret-key {
     width: 550px;
 }
+
+#bs_time_check_severity {
+    margin-left: 5px;
+}

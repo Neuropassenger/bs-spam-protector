@@ -365,11 +365,15 @@ class Bs_Spam_Protector_Public {
                 Bs_Spam_Protector_Functions::logit( array(
                     'expected_filling_field_time'   =>  $expected_filling_field_time,
                     'expected_filling_form_time'    =>  $expected_filling_form_time,
-                    'field_name'                    =>  $field_name
+                    'field_name'                    =>  $field_name,
                 ), '[INFO]: Expected filling time for the ' . $field_type . ' field type' );
         }
 
-        return $expected_filling_form_time;
+        // Let's use the severity setting
+        $severity = (int) get_option( 'bs_spam_protector_time_check_severity', 50 );
+        $severity_divider = round( 100 / $severity );
+
+        return round( $expected_filling_form_time / $severity_divider );
     }
 
     function get_form_field_type_by_name( $field_name ) {
@@ -421,15 +425,6 @@ class Bs_Spam_Protector_Public {
         unset( $args['fields']['bs_hf_form_id'] );
 
         return $args;
-    }
-
-    public function do_upgrade() {
-        // Expiration interval
-        $expiration_interval = get_option( 'bs_spam_protector_expiration_interval', false );
-
-        if ( version_compare( $this->version, '1.6.0', '>=' ) && $expiration_interval == false ) {
-            update_option( 'bs_spam_protector_expiration_interval', 12 );
-        }
     }
 
 }

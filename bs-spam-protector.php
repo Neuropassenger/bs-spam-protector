@@ -15,7 +15,7 @@
  * @wordpress-plugin
  * Plugin Name:       BS SPAM Protector
  * Description:       This plugin protects Contact Form 7 from spam.
- * Version:           1.6.1
+ * Version:           1.7.1
  * Author:            Oleg Sokolov
  * Author URI:        https://neuropassenger.ru
  * License:           GPL-2.0+
@@ -34,7 +34,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'BS_SPAM_PROTECTOR_VERSION', '1.6.1' );
+define( 'BS_SPAM_PROTECTOR_VERSION', '1.7.1' );
 
 /**
  * The code that runs during plugin activation.

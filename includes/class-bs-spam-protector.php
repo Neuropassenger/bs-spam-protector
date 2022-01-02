@@ -162,6 +162,8 @@ class Bs_Spam_Protector {
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_settings_page' );
         $this->loader->add_action( 'admin_init', $plugin_admin, 'add_plugin_settings' );
 
+        $this->loader->add_action( 'plugins_loaded', $plugin_admin, 'do_upgrade' );
+
 	}
 
 	/**
@@ -177,8 +179,6 @@ class Bs_Spam_Protector {
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
-
-        $this->loader->add_action( 'plugins_loaded', $plugin_public, 'do_upgrade' );
 
 		$this->loader->add_action( 'wp_ajax_bs_get_validation_key', $plugin_public, 'ajax_get_validation_key' );
 		$this->loader->add_action( 'wp_ajax_nopriv_bs_get_validation_key', $plugin_public, 'ajax_get_validation_key' );

@@ -125,6 +125,13 @@ class Bs_Spam_Protector_Admin {
             'bs_spam_protector_secret_key'
         );
 
+        add_settings_section(
+            'bs_spam_protector_general',
+            'General Settings',
+            array( $this, 'show_general_settings_section' ),
+            $this->plugin_name
+        );
+
         register_setting(
             'bs_spam_protector_general',
             'bs_spam_protector_log_checkbox'
@@ -135,11 +142,9 @@ class Bs_Spam_Protector_Admin {
             'bs_spam_protector_expiration_interval'
         );
 
-        add_settings_section(
+        register_setting(
             'bs_spam_protector_general',
-            'General Settings',
-            array( $this, 'show_general_settings_section' ),
-            $this->plugin_name
+            'bs_spam_protector_time_check_severity'
         );
 
         add_settings_field(
@@ -165,6 +170,14 @@ class Bs_Spam_Protector_Admin {
             $this->plugin_name,
             'bs_spam_protector_general'
         );
+
+        add_settings_field(
+            'bs_spam_protector_time_check_severity',
+            'Severity of filling time check (between 1 and 100 percents)',
+            array( $this, 'show_time_check_severity_field' ),
+            $this->plugin_name,
+            'bs_spam_protector_general'
+        );
     }
 
     function show_general_settings_section() {
@@ -186,6 +199,29 @@ class Bs_Spam_Protector_Admin {
         $expiration_interval = get_option( 'bs_spam_protector_expiration_interval' );
         echo "<input type='number' class='regular-text bs_spam_protector_expiration_interval' name='bs_spam_protector_expiration_interval' placeholder='12' value='" . (esc_attr( $expiration_interval ) ?? '') . "'>";
         echo "<p>The allowed time interval <strong>in hours</strong> between opening and submitting a form.</p>";
+    }
+
+    function show_time_check_severity_field() {
+        $severity = get_option( 'bs_spam_protector_time_check_severity', false );
+        echo "<input min='1' max='100' step='1' type='range' class='regular-text bs_spam_protector_time_check_severity' name='bs_spam_protector_time_check_severity' placeholder='50' oninput='document.getElementById(\"bs_time_check_severity\").value = this.value;' value='" . (esc_attr( $severity ) ?? '') . "'>";
+        echo "<output id='bs_time_check_severity'>" . esc_attr( ( $severity ) ?? '' ) . "</output><span>%</span>";
+        echo "<p>How stringent the fill time check should be. <br>Typically, 50% severity is appropriate for most cases.</p>";
+    }
+
+    public function do_upgrade() {
+        // Expiration interval
+        $expiration_interval = get_option( 'bs_spam_protector_expiration_interval', false );
+
+        if ( version_compare( $this->version, '1.6.0', '>=' ) && $expiration_interval == false ) {
+            update_option( 'bs_spam_protector_expiration_interval', 12 );
+        }
+
+        // Time check severity
+        $severity = get_option( 'bs_spam_protector_time_check_severity', false );
+
+        if ( version_compare( $this->version, '1.7.0', '>=' ) && $severity == false ) {
+            update_option( 'bs_spam_protector_time_check_severity', 50 );
+        }
     }
 
 }

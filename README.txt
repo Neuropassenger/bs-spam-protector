@@ -4,7 +4,7 @@ Donate link: https://neuropassenger.ru
 Tags: cf7, spam, form
 Requires at least: 5.7.2
 Tested up to: 5.8.2
-Stable tag: 1.6.1
+Stable tag: 1.7.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -16,6 +16,12 @@ This plugin protects Contact Form 7 from spam.
 2. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+= 1.7.1 =
+* Code improvements.
+
+= 1.7.0 =
+* The ability to adjust the severity of the check for the time it takes to fill out the form.
 
 = 1.6.1 =
 * After the plugin update, the time interval for filling out forms is set to 12 hours for the validator to work correctly.
