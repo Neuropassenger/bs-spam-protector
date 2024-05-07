@@ -116,7 +116,7 @@ class Bs_Spam_Protector_Admin {
             submit_button();
             ?>
         </form>
-        <?
+        <?php
     }
 
     public function add_plugin_settings() {
