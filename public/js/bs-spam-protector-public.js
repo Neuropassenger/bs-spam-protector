@@ -72,7 +72,7 @@
 		});
 
 		function getValidationKey(elemOnFocus) {
-			const formId = $(elemOnFocus).closest("div.wpcf7[role='form']").attr('id');
+			const formId = $(elemOnFocus).closest("div.wpcf7.js").attr('id');
 			$(elemOnFocus).closest('form.wpcf7-form').find('.bs_hf-form-id').val(formId);
 
 			if (typeof validationCodesSent[formId] !== 'undefined' && validationCodesSent[formId] === true)
